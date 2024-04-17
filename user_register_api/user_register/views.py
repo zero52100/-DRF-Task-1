@@ -26,11 +26,11 @@ class UserLoginAPIView(APIView):
         if serializer.is_valid():
             validated_data = serializer.validated_data
             user = validated_data['user']
-            user_serializer = UserSerializer(user)  # Serialize the user object
+            user_serializer = UserSerializer(user)  
             response_data = {
                 'refresh': validated_data['refresh'],
                 'access': validated_data['access'],
-                'user': user_serializer.data  # Include serialized user data in the response
+                'user': user_serializer.data 
             }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
