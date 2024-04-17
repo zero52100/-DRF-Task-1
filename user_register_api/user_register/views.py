@@ -5,7 +5,11 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSe
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-
+from django.contrib.auth.models import User
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 
 class UserRegistrationAPIView(APIView):
@@ -36,16 +40,28 @@ class UserLoginAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    
 
     def get(self, request):
-        users = User.objects.all()
+        query = request.query_params.get('search')
+        if query:
+           
+            users = User.objects.filter(
+                Q(username__icontains=query) | 
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(email__icontains=query)
+            )
+        else:
+           
+            users = User.objects.all()
+        
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserDetailsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+   
 
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
